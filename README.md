@@ -1,2 +1,2 @@
 # Build-Impact-Analysis
-Hello
+This repository contains the code that analyses the build dependency graph and outputs the files effected by any given commit.
