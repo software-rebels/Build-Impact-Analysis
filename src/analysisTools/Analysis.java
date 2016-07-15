@@ -10,20 +10,26 @@ public class Analysis
 	public static void main(String[] args)
 	{
 		Analysis analysis = new Analysis();
-		Parser parser = new Parser("/home/owais/Desktop/Results/gitlogvtk.txt");
-		analysis.createGraph("/home/owais/vtk/trace.gdf");
-		analysis.parsePageRanks("/home/owais/Desktop/Results/vtkAnalysisAfterRemovingPhony(whole).txt");
+//		Parser parser = new Parser("/home/owais/Desktop/Results/gitlogvtk.txt");
+//		analysis.createGraph("/home/owais/vtk/trace.gdf");
+//		analysis.parsePageRanks("/home/owais/Desktop/Results/vtkAnalysisAfterRemovingPhony(whole).txt");
 		
 		try
 		{
-			parser.parseLog("/home/owais/Desktop/Results/parsedCommits.txt", 25);
-			analysis.analyseParsedLog("/home/owais/Desktop/Results/parsedCommits.txt",3);
+//			parser.parseLog("/home/owais/Desktop/Results/parsedCommits.txt", 25);
+//			analysis.analyseParsedLog("/home/owais/Desktop/Results/parsedCommits.txt",3);
+			System.out.print("Program started.");
+			analysis.sortAnalysedLog("/home/owais/Desktop/Results/dependencies.txt");
 			System.out.print("Program ended.");
+			
+			
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
+		
+
 	}
 	
 	public Analysis()
@@ -39,6 +45,7 @@ public class Analysis
 	public void analyseParsedLog(String log, int noOfCommitsToAnalyse) throws IOException
 	{
 		BufferedReader br = new BufferedReader(new FileReader(new File(log)));
+		BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/home/owais/Desktop/Results/dependencies.txt")));
 		String readLine = "";
 		String temp[];
 		int i = 0;
@@ -63,27 +70,18 @@ public class Analysis
 						LinkedList<String> dependencies = new LinkedList<String>();
 						findDependencies(realName, dependencies);
 						
-						try
+						String t = "";
+						bw.write(temp2[j]);
+						bw.newLine();
+						Iterator<String> k = dependencies.iterator();
+						while(k.hasNext())
 						{
-							String t = "";
-							BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/home/owais/Desktop/Results/dependencies.txt")));
-							bw.write(temp2[j]);
+							t = k.next();
+							bw.write(t);
 							bw.newLine();
-							Iterator<String> k = dependencies.iterator();
-							while(k.hasNext())
-							{
-								t = k.next();
-								bw.write(t);
-								bw.newLine();
-							}
-							System.out.println("Iteration Completed");
-							bw.write("\n \n \n");
-							bw.close();
 						}
-						catch(Exception e)
-						{
-							e.printStackTrace();
-						}
+						System.out.println("Iteration Completed");
+						bw.write("\n");
 					}		
 					else
 					{
@@ -96,6 +94,7 @@ public class Analysis
 				
 			}
 		}
+		bw.close();
 		br.close();
 	}
 	
@@ -218,6 +217,75 @@ public class Analysis
 		}
 	}
 
+	public void sortAnalysedLog(String analysedLogDestination)throws IOException
+	{
+		BufferedReader br = new BufferedReader(new FileReader(new File(analysedLogDestination)));
+		BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/home/owais/Desktop/Results/sortedDependencies.txt")));
+		String newLine = "";
+		String[] temp;
+		LinkedList<Node> sortedList = new LinkedList<Node>();
+
+		
+		while(true)
+		{
+			newLine = br.readLine();
+			
+			if(newLine == null)
+			{
+				break;
+			}
+			else if(newLine.isEmpty())
+			{
+				sort(sortedList);
+				System.out.print("List Done.");
+				Node temp2;
+				Iterator<Node> i = sortedList.iterator();
+				while(i.hasNext())
+				{
+					temp2=i.next();
+					bw.write(temp2.toString());
+					bw.newLine();
+				}
+				bw.write("\n \n \n");
+				sortedList.clear();
+			}
+			else if((temp=newLine.split(":")).length==1)
+			{
+				
+				bw.write(newLine);
+				bw.newLine();
+			}
+			else
+			{
+				Node temp4 = new Node(temp[0],Double.parseDouble(temp[1]));
+				
+				if(Double.parseDouble(temp[1])!=-1.0 && !sortedList.contains(temp4))
+				{
+					sortedList.add(temp4);
+				}
+				//bw.write(Arrays.toString(temp));
+				//bw.newLine();
+			}
+		}
+		br.close();
+		bw.close();
+		
+	}
 	
+	public void sort(LinkedList<Node> ll)
+	{
+		for(int i=0;i<ll.size()-1;i++)
+		{
+			for(int j=0;j<ll.size()-1-i;j++)
+			{
+				if(ll.get(j).compare(ll.get(j+1))==1)
+				{
+					Node temp = ll.get(j+1);
+					ll.set(j+1, ll.get(j));
+					ll.set(j, temp);
+				}
+			}
+		}
+	}
 	
 }

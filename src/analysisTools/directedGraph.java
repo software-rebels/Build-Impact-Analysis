@@ -19,24 +19,33 @@ public class directedGraph
 		String nodeRank = "";
 		String temp = "";
 		String temp2 = "";
+		int k = 0;
 		
+		LinkedList<String> queue = new LinkedList<String>();
+		queue.addLast(nodeName);
 		
-		Iterator<String> i = vertices.keySet().iterator();
-		while(i.hasNext())
+		while(queue.isEmpty()==false && k<10000)
 		{
-			temp = i.next();
-			if(!temp.equals(nodeName))
+			String node = queue.removeFirst();
+			
+			Iterator<String> i = vertices.keySet().iterator();
+			while(i.hasNext())
 			{
-				LinkedList<String> connections = getNeighbours(temp);
-				Iterator<String> j = connections.iterator();
-				while(j.hasNext())
+				temp = i.next();
+				if(!temp.equals(node))
 				{
-					temp2 = j.next();
-					if(temp2.equals(nodeName))
+					LinkedList<String> connections = getNeighbours(temp);
+					Iterator<String> j = connections.iterator();
+					while(j.hasNext())
 					{
-						//System.out.println(temp + " : "+ pageRanks.get(temp));
-						dependencies.add(temp + " : "+ pageRanks.get(temp));
-						findDependencies(temp, dependencies);
+						temp2 = j.next();
+						if(temp2.equals(node))
+						{
+							//System.out.println(temp + " : "+ pageRanks.get(temp));
+							dependencies.add(temp + " : "+ pageRanks.get(temp));
+							queue.addLast(temp);
+							k++;
+						}
 					}
 				}
 			}
