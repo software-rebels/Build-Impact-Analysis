@@ -3,12 +3,12 @@ package analysisTools;
 import java.util.*;
 import java.io.*;
 
-public class directedGraph
+public class DirectedGraph
 {
 	HashMap<String, LinkedList<String>> vertices;
 	HashMap<String, Double> pageRanks;
 	
-	public directedGraph()
+	public DirectedGraph()
 	{
 		vertices = new HashMap<String, LinkedList<String>>();
 		pageRanks = new HashMap<String, Double>();

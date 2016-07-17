@@ -5,7 +5,7 @@ import java.io.*;
 
 public class Analysis
 {
-	directedGraph graph;
+	DirectedGraph graph;
 	
 	public static void main(String[] args)
 	{
@@ -34,7 +34,7 @@ public class Analysis
 	
 	public Analysis()
 	{
-		this.graph = new directedGraph();
+		this.graph = new DirectedGraph();
 	}
 	
 	public void findDependencies(String name, LinkedList<String> dependencies)
