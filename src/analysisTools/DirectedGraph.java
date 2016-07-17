@@ -14,43 +14,38 @@ public class DirectedGraph
 		pageRanks = new HashMap<String, Double>();
 	}
 	
+  // TODO: Rewrite as iterative for performance reasons
 	public void findDependencies(String nodeName, LinkedList<String> dependencies)
 	{
-		String nodeRank = "";
-		String temp = "";
-		String temp2 = "";
-		int k = 0;
-		
 		LinkedList<String> queue = new LinkedList<String>();
 		queue.addLast(nodeName);
 		
-		while(queue.isEmpty()==false && k<10000)
+    // Why 10,000???
+    
+    int k = 0
+		for(String node = queue.removeFirst(); !queue.isEmpty() && k<10000; node = queue.removeFirst())
 		{
-			String node = queue.removeFirst();
-			
 			Iterator<String> i = vertices.keySet().iterator();
-			while(i.hasNext())
+			for(String curVertex = i.next(); i.hasNext(); curVertex = i.next())
 			{
-				temp = i.next();
-				if(!temp.equals(node))
+				if(!curVertex.equals(node))
 				{
-					LinkedList<String> connections = getNeighbours(temp);
+					LinkedList<String> connections = vertices.get(curVertex); // load the neighbours
 					Iterator<String> j = connections.iterator();
-					while(j.hasNext())
+
+					for(String curDep = j.next(); j.hasNext(); curDep = j.next())
 					{
-						temp2 = j.next();
-						if(temp2.equals(node))
+						if(curDep.equals(node))
 						{
-							//System.out.println(temp + " : "+ pageRanks.get(temp));
-							dependencies.add(temp + " : "+ pageRanks.get(temp));
-							queue.addLast(temp);
+							//System.out.println(curVertex + " : "+ pageRanks.get(curVertex));
+							dependencies.add(curVertex+ " : "+ pageRanks.get(curVertex));
+							queue.addLast(curVertex);
 							k++;
 						}
 					}
 				}
 			}
 		}
-		
 	}
 	
 	public void addVertex(String s)
@@ -69,11 +64,6 @@ public class DirectedGraph
 		
 		LinkedList<String> edges = vertices.get(s1);
 		if(!edges.contains(s2))edges.addLast(s2);
-	}
-	
-	public LinkedList<String> getNeighbours(String s)
-	{
-		return vertices.get(s);
 	}
 	
 	public LinkedList<String> getVertices()

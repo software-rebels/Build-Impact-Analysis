@@ -37,87 +37,87 @@ public class Analysis
 		this.graph = new DirectedGraph();
 	}
 	
-	public void findDependencies(String name, LinkedList<String> dependencies)
+	public void analyseParsedLog(String parsedLogFile, int noOfCommitsToAnalyse) throws IOException
 	{
-		graph.findDependencies(name, dependencies);
-	}
-	
-	public void analyseParsedLog(String log, int noOfCommitsToAnalyse) throws IOException
-	{
-		BufferedReader br = new BufferedReader(new FileReader(new File(log)));
-		BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/home/owais/Desktop/Results/dependencies.txt")));
-		String readLine = "";
-		String temp[];
-		int i = 0;
+		BufferedReader br = new BufferedReader(new FileReader(new File(parsedLogFile)));
 		
-		while((readLine = br.readLine())!=null && i<noOfCommitsToAnalyse+1)
+    String curLine = br.readLine();
+		for(int i = 0; curLine !=null && i<noOfCommitsToAnalyse+1; curLine = br.readLine(), i++)
 		{
-			temp = readLine.split(",");
-			if(temp.length>2)
+			String[] lineSplit = curLine.split(",");
+      
+      // Skip lines that are less than 3 elements line (TODO: Why???)
+			if(lineSplit.length<=2)
 			{
-				String[] temp2 = reduceArray(temp);
-				System.out.println(Arrays.toString(temp2));
+        continue;
+      }
+
+			String[] cleanLineSplit = reduceArray(lineSplit);
+			System.out.println(Arrays.toString(cleanLineSplit));
 				
-				for(int j=0;j<temp2.length;j++)
+			for(int j=0;j<cleanLineSplit.length;j++)
+			{
+				String realName = findNodeName(cleanLineSplit[j]);
+				if(realName != null)
 				{
-					String realName = findNodeName(temp2[j]);
-					if(realName != null)
+					System.out.println("The "+lineSplit[0]+" made on the "+lineSplit[1]+" added/modified \n the "
+							+ "file named "+cleanLineSplit[j]+". The files and their corresponding \n pageranks"
+									+ " affected by adding/modifying "+cleanLineSplit[j]+" are as follows: ");
+					
+					LinkedList<String> dependencies = new LinkedList<String>();
+					graph.findDependencies(realName, dependencies);
+					
+					try
 					{
-						System.out.println("The "+temp[0]+" made on the "+temp[1]+" added/modified \n the "
-								+ "file named "+temp2[j]+". The files and their corresponding \n pageranks"
-										+ " affected by adding/modifying "+temp2[j]+" are as follows: ");
-						
-						LinkedList<String> dependencies = new LinkedList<String>();
-						findDependencies(realName, dependencies);
-						
-						String t = "";
-						bw.write(temp2[j]);
+            // TODO: Hardcoded filename...
+						BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/home/owais/Desktop/Results/dependencies.txt")));
+            // Write the token???
+						bw.write(cleanLineSplit[j]);
 						bw.newLine();
+
 						Iterator<String> k = dependencies.iterator();
-						while(k.hasNext())
+						for(String dep = k.next(); k.hasNext(); dep = k.next())
 						{
-							t = k.next();
-							bw.write(t);
+							bw.write(dep);
 							bw.newLine();
 						}
 						System.out.println("Iteration Completed");
-						bw.write("\n");
-					}		
-					else
-					{
-						System.out.println("The file "+temp2[j]+" was not found to be a node"
-								+ " in the build dependency graph of the software system under consideration.");
+						bw.write("\n \n \n"); // Why three blank lines???
+						bw.close();
 					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+				}		
+				else
+				{
+					System.out.println("The file "+cleanLineSplit[j]+" was not found to be a node"
+							+ " in the build dependency graph of the software system under consideration.");
 				}
-				print3Lines();
-				i++;
-				
 			}
+
+      // I don't understand why these three blank lines are printed
+			System.out.println();
+		  System.out.println();
+		  System.out.println();
 		}
 		bw.close();
 		br.close();
-	}
-	
-	public void print3Lines()
-	{
-		System.out.println();
-		System.out.println();
-		System.out.println();
 	}
 	
 	public String[] reduceArray(String[] a)
 	{
 		int length = a.length-2;
 		String[] shortArr = new String[length];
+    
+    // throw away first two elements
 		for(int i=0;i<length;i++)
 		{
 			shortArr[i]=a[i+2];
-		}
-		
-		for(int i=0;i<length;i++)
-		{
-			if(shortArr[i].charAt(0)=='A' || shortArr[i].charAt(0)=='M')
-			{
+
+      // Throw away leading A or M and clean up whitespace (TODO: Why???)
+      if (shortArr[i].startsWith("A") || shortArr[i].startsWith("M")) {
 				shortArr[i] = shortArr[i].substring(2, shortArr[i].length());
 				shortArr[i] = shortArr[i].replaceAll("\\s", "");
 			}
@@ -127,36 +127,36 @@ public class Analysis
 	
 	public String findNodeName(String a) throws IOException
 	{
+    // What is this hardcoded file name?
+    // Also, this is really inefficient because it reads this whole file again and again for every token!
 		BufferedReader br = new BufferedReader(new FileReader(new File("/home/owais/vtk/trace.gdf")));
 		String newLine = "";
+    String rtn = null;
 		
-		while((newLine = br.readLine()).contains("edgedef>")==false)
+		while(!(newLine = br.readLine()).startsWith("edgedef>"))
 		{
-			String[] temp = newLine.split(",");
-			if(a.equals(temp[1]))
+			String[] lineSplit = newLine.split(",");
+			if(a.equals(lineSplit[1]))
 			{
-				br.close();
-				return temp[0];
+				rtn = lineSplit[0];
+        break;
 			}
 		}
 		
 		br.close();
-		return null;
+		return rtn;
 	}
 
 	public void parsePageRanks(String ranksFile)
 	{
-		String[] temp;
-		String readLine ="";
-		
 		try
 		{
 			BufferedReader br = new BufferedReader(new FileReader(new File(ranksFile)));
-			readLine = br.readLine();
-			while((readLine = br.readLine()) != null)
+			String curLine = br.readLine(); // Throw away first line????
+			while((curLine = br.readLine()) != null)
 			{
-				temp = readLine.split(" ");
-				graph.setPageRank(temp[0], Double.parseDouble(temp[2]));
+				String[] lineSplit = curLine.split(" ");
+				graph.setPageRank(lineSplit[0], Double.parseDouble(lineSplit[2]));
 			}
 			System.out.println("Page Ranks Parsed.");
 			br.close();
@@ -169,43 +169,30 @@ public class Analysis
 	
 	public void createGraph(String traceFile)
 	{
-		String readLine = "";
-		String[] temp = new String[15];
 		try
 		{
 			BufferedReader br = new BufferedReader(new FileReader(new File(traceFile)));
 			
-			while(readLine.contains("nodedef>")==false)
-			{
-				readLine = br.readLine();
-			}
+      // Consume the nodedef line
+			while(!br.readLine().startsWith("nodedef>"));
 			
-			while(true)
+      // Process nodes
+      for(String curLine = br.readLine(); !curLine.startsWith("edgedef>"); curLine = br.readLine())
 			{
-				readLine = br.readLine();
-				if(readLine.contains("edgedef>"))
-				{
-					break;
-				}
-				temp = readLine.split(",");
-				graph.addVertex(temp[0]);
+				String[] lineSplit = curLine.split(",");
+				graph.addVertex(lineSplit[0]);
 				
-				if(temp[8].equals("1"))
+				if(lineSplit[8].equals("1"))
 				{
-					graph.setPageRank(temp[0], -1.0);
+					graph.setPageRank(lineSplit[0], -1.0);
 				}
 			}
 			
-			while(true)
+      // Process edges
+			for(String curLine = br.readLine(); curLine != null; curLine = br.readLine())
 			{
-				readLine = br.readLine();
-				if(readLine == null)
-				{
-					break;
-				}
-				
-				temp = readLine.split(",");
-				graph.addEdge(temp[0], temp[1]);
+				String[] lineSplit = curLine.split(",");
+				graph.addEdge(lineSplit[0], lineSplit[1]);
 			}
 			
 			System.out.println("Graph Created.");
@@ -287,5 +274,4 @@ public class Analysis
 			}
 		}
 	}
-	
 }
