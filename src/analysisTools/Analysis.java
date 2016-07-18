@@ -40,21 +40,26 @@ public class Analysis
 	public void analyseParsedLog(String parsedLogFile, int noOfCommitsToAnalyse) throws IOException
 	{
 		BufferedReader br = new BufferedReader(new FileReader(new File(parsedLogFile)));
-		
-    String curLine = br.readLine();
+    	String curLine = br.readLine();
+
 		for(int i = 0; curLine !=null && i<noOfCommitsToAnalyse+1; curLine = br.readLine(), i++)
 		{
 			String[] lineSplit = curLine.split(",");
       
-      // Skip lines that are less than 3 elements line (TODO: Why???)
+      		//The first two elements are the commit id and date respectively so if there are only 2 elements in a line it means 
+      		//no files were added or modified in that commit.
 			if(lineSplit.length<=2)
 			{
-        continue;
-      }
+        		continue;
+      		}
 
+      		//Shorten the array to include only the names of the files that were changed in that commit.
 			String[] cleanLineSplit = reduceArray(lineSplit);
+
+			//For testing purposes. (Delete after testing)
 			System.out.println(Arrays.toString(cleanLineSplit));
-				
+			
+			//This loop goes over each file changed during a commit and prints out all the files affected by changing it.	
 			for(int j=0;j<cleanLineSplit.length;j++)
 			{
 				String realName = findNodeName(cleanLineSplit[j]);
@@ -98,9 +103,9 @@ public class Analysis
 			}
 
       // I don't understand why these three blank lines are printed
-			System.out.println();
-		  System.out.println();
-		  System.out.println();
+		System.out.println();
+		System.out.println();
+		System.out.println();
 		}
 		bw.close();
 		br.close();
@@ -116,7 +121,8 @@ public class Analysis
 		{
 			shortArr[i]=a[i+2];
 
-      // Throw away leading A or M and clean up whitespace (TODO: Why???)
+      // This is done to get the file names in the same format as they are in the file with the pageranks 
+      // so that they can be compared and their scores can be retrieved.
       if (shortArr[i].startsWith("A") || shortArr[i].startsWith("M")) {
 				shortArr[i] = shortArr[i].substring(2, shortArr[i].length());
 				shortArr[i] = shortArr[i].replaceAll("\\s", "");
