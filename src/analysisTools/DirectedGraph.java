@@ -1,44 +1,46 @@
 package analysisTools;
 
-import java.util.*;
+mport java.util.*;
 import java.io.*;
 
 public class DirectedGraph
 {
+	//DriectedGraph fields
 	HashMap<String, LinkedList<String>> vertices;
 	HashMap<String, Double> pageRanks;
 	
+	//Constructor
 	public DirectedGraph()
 	{
 		vertices = new HashMap<String, LinkedList<String>>();
 		pageRanks = new HashMap<String, Double>();
 	}
 	
-  // TODO: Rewrite as iterative for performance reasons
+	//This method takes in the name of the file changed in a commit and returns a linked list
+	//of the names of all the files that were affected with their corresponding pageranks. 
 	public void findDependencies(String nodeName, LinkedList<String> dependencies)
 	{
 		LinkedList<String> queue = new LinkedList<String>();
 		queue.addLast(nodeName);
-		
-    // Why 10,000???
-    
-    int k = 0
-		for(String node = queue.removeFirst(); !queue.isEmpty() && k<10000; node = queue.removeFirst())
+
+		int k=0;
+
+		for(String node = queue.removeFirst(); queue.isEmpty()==false && k<10000; node = queue.removeFirst())
 		{
 			Iterator<String> i = vertices.keySet().iterator();
-			for(String curVertex = i.next(); i.hasNext(); curVertex = i.next())
+			for (String curVertex = i.next();i.hasNext(); curVertex = i.next() )
 			{
 				if(!curVertex.equals(node))
 				{
-					LinkedList<String> connections = vertices.get(curVertex); // load the neighbours
+					LinkedList<String> connections = getNeighbours(curVertex);
 					Iterator<String> j = connections.iterator();
 
-					for(String curDep = j.next(); j.hasNext(); curDep = j.next())
+					for (String curDep = j.next(); j.hasNext(); curDep = j.next())
 					{
 						if(curDep.equals(node))
 						{
-							//System.out.println(curVertex + " : "+ pageRanks.get(curVertex));
-							dependencies.add(curVertex+ " : "+ pageRanks.get(curVertex));
+							//System.out.println(temp + " : "+ pageRanks.get(temp));
+							dependencies.add(curVertex + " : "+ pageRanks.get(curVertex));
 							queue.addLast(curVertex);
 							k++;
 						}
@@ -48,6 +50,7 @@ public class DirectedGraph
 		}
 	}
 	
+	//Helper Methods
 	public void addVertex(String s)
 	{
 		if(vertices.containsKey(s))
@@ -64,6 +67,11 @@ public class DirectedGraph
 		
 		LinkedList<String> edges = vertices.get(s1);
 		if(!edges.contains(s2))edges.addLast(s2);
+	}
+	
+	public LinkedList<String> getNeighbours(String s)
+	{
+		return vertices.get(s);
 	}
 	
 	public LinkedList<String> getVertices()
