@@ -14,9 +14,13 @@ git log --oneline --name-only --diff-filter=AM --pretty=format:"Commit:%h%nDate:
 to create a text file with the git log in it.
 
 4. Then in the config.properties file input the following arguments:
+
 	i.   The location of trace.gdf.
+
 	ii.  The location of the folder to store the results.
+	
 	iii. The location of the commit log obtained in step 3.
+	
 	iv.  The no. of commits to analyse.
 
 OUTPUT:
