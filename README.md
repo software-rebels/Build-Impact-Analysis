@@ -4,7 +4,9 @@ This repository contains the code that analyses the build dependency graph and o
 HOW TO USE:
 
 1. Create the trace.txt file using MAKAO of the software system under consideration. (For more information refer to http://mcis.polymtl.ca/makao.html)
+
 2. Using the generate_makao_graph.pl script create the trace.gdf file.
+
 3. In bash use the command: 
 
 git log --oneline --name-only --diff-filter=AM --pretty=format:"Commit:%h%nDate:%cd" <revision_range> > enter_file_name_here
