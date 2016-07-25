@@ -8,9 +8,7 @@ HOW TO USE:
 2. Using the generate_makao_graph.pl script create the trace.gdf file.
 
 3. In bash use the command: 
-
 git log --oneline --name-only --diff-filter=AM --pretty=format:"Commit:%h%nDate:%cd" <revision_range> > enter_file_name_here
-   
 to create a text file with the git log in it.
 
 4. Then in the config.properties file input the following arguments:
